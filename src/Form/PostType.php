@@ -10,6 +10,8 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Validator\Constraints\File;
 
 class PostType extends AbstractType
 {
@@ -21,9 +23,11 @@ class PostType extends AbstractType
                 'choices' => Post::TYPES
             ])
             ->add('description')
-            ->add('file')
-            ->add('creation_date')
-            ->add('url')
+            ->add('file', FileType::class, [
+                'label' => 'photo',
+                'required' => false,
+            ]
+            )
             ->add('submit', type:SubmitType::class)
         ;
     }

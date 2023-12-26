@@ -12,6 +12,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class UserController extends AbstractController
 {
@@ -32,13 +35,31 @@ class UserController extends AbstractController
     }
 
     #[Route('/user/insert', name: 'insert_user')]
-    public function insertar(request $request, UserPasswordHasherInterface $passwordHasher): Response
+    public function insertar(request $request, UserPasswordHasherInterface $passwordHasher, SluggerInterface $slugger): Response
     {
         $user = new User($request);
         $form = $this->createForm(userType::class, $user);
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
+            
+            $file = $form->get('photo')->getData();
+
+            if($file){
+                $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+                try {
+                    $file->move(
+                        $this->getParameter('files_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    throw new \Exception('problema al subir el archivo');
+                }
+                $user->setPhoto($newFilename);
+            }
+            
             $pass = $form->get('password')->getData();
 
             $hashedPassword = $passwordHasher->hashPassword(

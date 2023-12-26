@@ -5,6 +5,8 @@ namespace App\Repository;
 use App\Entity\Post;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query;
 
 /**
  * @extends ServiceEntityRepository<Post>
@@ -19,6 +21,16 @@ class PostRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Post::class);
+    }
+
+    public function findAllPosts(){
+        return $this->getEntityManager()->createQuery(
+            'SELECT post.id, post.title, post.description, post.file, post.creation_date, post.url, user.id AS user_id, user.email AS user_username
+            FROM App:Post post
+            JOIN post.user user
+            ORDER BY post.id DESC ' 
+        )
+        ->GetResult();
     }
 
 //    /**
