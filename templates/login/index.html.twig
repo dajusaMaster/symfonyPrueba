@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bienvenido!{% endblock %}
+
+{% block body %}
+    {% if error %}
+        <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    <h4>BIEVENIDOS</h4><br>
+
+    <form action="{{ path('app_login') }}" method="post">
+        <label for="username">Email:</label>
+        <input type="text" id="username" name="_username" value="{{ last_username }}">
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="_password">
+        <br>
+        <input type="hidden" name="_target_path" value="/post">
+        <button type="submit">Ingresar</button>
+    </form>
+{% endblock %}
